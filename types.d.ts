@@ -1,5 +1,17 @@
 import { Budget, Settings, Transaction, User } from "@prisma/client";
 
+type HistoryYear = {
+  year: number;
+};
+
+type HistoryData = {
+  expense: number;
+  income: number;
+  year: number;
+  month: number;
+  day?: number;
+};
+
 type BudgetExt = Budget & {
   transactions: Transaction[];
 };
@@ -10,6 +22,11 @@ type UserExt = User & {
 };
 
 type TransactionType = "income" | "expense";
+type TimeFrame = "month" | "year";
+type Period = {
+  year: number;
+  month: number;
+};
 
 type CategorySummary = {
   categoryId: string;

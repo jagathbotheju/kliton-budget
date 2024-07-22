@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Budget, Category } from "@prisma/client";
 import {
   Command,
@@ -38,7 +38,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "./ui/button";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import NewCategoryDialog from "./NewCategoryDialog";
 import _ from "lodash";
 import NewBudgetDialog from "./NewBudgetDialog";
@@ -48,6 +48,7 @@ import { Calendar } from "./ui/calendar";
 import { createTransaction } from "@/actions/transactionActions";
 import { toast } from "sonner";
 import { useBudgetStore } from "@/stores/budgetStore";
+import { useRouter } from "next/navigation";
 
 interface Props {
   trigger: React.ReactNode;
@@ -57,14 +58,24 @@ interface Props {
 }
 
 const NewTransactionDialog = ({ trigger, type, categories, user }: Props) => {
-  const { budget, setBudget, setBudgetSummary } = useBudgetStore(
-    (store) => store
-  );
+  const router = useRouter();
+  const {
+    budget,
+    setBudget,
+    setBudgetSummary,
+    setCategorySummary,
+    setHistoryYears,
+    period,
+    timeFrame,
+    setYearHistoryData,
+    setMonthHistoryData,
+  } = useBudgetStore((store) => store);
   const budgets = user.budgets as Budget[];
   const [openTransaction, setOpenTransaction] = useState(false);
   const [openCategory, setOpenCategory] = useState(false);
   const [openBudget, setOpenBudget] = useState(false);
   const [openDate, setOpenDate] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof NewTransactionSchema>>({
     resolver: zodResolver(NewTransactionSchema),
@@ -78,9 +89,7 @@ const NewTransactionDialog = ({ trigger, type, categories, user }: Props) => {
     },
   });
 
-  useEffect(() => {
-    form.setValue("budget", budget.name);
-  }, [budget.name, form]);
+  form.setValue("budget", budget.name);
 
   const CategoryRow = ({ category }: { category: Category }) => {
     return (
@@ -92,33 +101,51 @@ const NewTransactionDialog = ({ trigger, type, categories, user }: Props) => {
   };
 
   const onSubmit = (formData: z.infer<typeof NewTransactionSchema>) => {
+    toast.loading("Creating Transaction...", { id: "create-transaction" });
     setOpenTransaction(false);
-    createTransaction({
-      formData,
-      budgetId: budgets.find((budget) => budget.name === formData.budget)?.id,
-      categoryId: categories.find(
-        (category) => category.name === formData.category
-      )?.id,
-    })
-      .then((res) => {
-        if (res.success) {
-          setBudgetSummary({ budgetId: budget.id });
-          return toast.success(res.message, { id: "create-transition" });
-        } else {
-          return toast.error(res.error, { id: "create-transition" });
-        }
+    startTransition(() => {
+      createTransaction({
+        formData,
+        budgetId: budgets.find((budget) => budget.name === formData.budget)?.id,
+        categoryId: categories.find(
+          (category) => category.name === formData.category
+        )?.id,
       })
-      .catch(() => {
-        toast.error("Internal Server Error, creating Transaction", {
-          id: "create-transition",
+        .then((res) => {
+          if (res.success) {
+            console.log("transaction crated successfully");
+            setBudgetSummary({ budgetId: budget.id });
+            setCategorySummary({ budgetId: budget.id });
+            setHistoryYears({ budgetId: budget.id });
+            if (timeFrame === "month")
+              setMonthHistoryData({
+                budgetId: budget.id,
+                year: period.year,
+                month: period.month,
+              });
+            if (timeFrame === "year")
+              setYearHistoryData({
+                budgetId: budget.id,
+                year: period.year,
+              });
+            return toast.success(res.message, { id: "create-transaction" });
+          } else {
+            return toast.error(res.error, { id: "create-transaction" });
+          }
+        })
+        .catch((err) => {
+          console.log("create transaction error :", err);
+          return toast.error("Internal Server Error, creating Transaction", {
+            id: "create-transaction",
+          });
         });
-      });
+    });
   };
 
   return (
     <Dialog open={openTransaction} onOpenChange={setOpenTransaction}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent>
+      <DialogContent aria-describedby="new transaction dialog">
         <DialogHeader className="my-5">
           <DialogTitle>
             Create a New{" "}
@@ -392,13 +419,24 @@ const NewTransactionDialog = ({ trigger, type, categories, user }: Props) => {
                 // disabled={!form.formState.isValid}
                 onClick={() => {
                   setOpenTransaction(false);
-                  form.reset();
+                  // form.reset();
                 }}
               >
                 Cancel
               </Button>
-              <Button variant="default" type="submit">
-                Create
+              <Button
+                variant="default"
+                type="submit"
+                disabled={isPending || !form.formState.isValid}
+              >
+                {isPending ? (
+                  <div className="flex gap-1">
+                    <Loader2 className="animate-spin" />
+                    <span>Creating...</span>
+                  </div>
+                ) : (
+                  <span>Create</span>
+                )}
               </Button>
             </div>
           </form>

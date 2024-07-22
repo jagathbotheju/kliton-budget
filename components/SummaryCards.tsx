@@ -12,7 +12,7 @@ interface Props {
 const SummaryCards = ({ isLoading, budgetSummary }: Props) => {
   return (
     <div className="relative flex w-full flex-wrap gap-2 md:flex-nowrap">
-      <SkeletonWrapper isLoading={isLoading}>
+      <SkeletonWrapper isLoading={isLoading} fullWidth>
         <SummaryCard
           amount={budgetSummary ? budgetSummary.income : 0}
           title="Income"

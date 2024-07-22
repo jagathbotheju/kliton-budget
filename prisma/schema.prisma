@@ -76,6 +76,31 @@ model Transaction{
   updatedAt DateTime @updatedAt
 }
 
+model MonthHistory {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  budgetId  String
+  day     Int
+  month   Int
+  year    Int
+  income  Float
+  expense Float
+
+  @@unique([day,month,year,budgetId])
+  
+}
+
+model YearHistory {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  budgetId  String
+  month   Int
+  year    Int
+  income  Float
+  expense Float
+
+  @@unique([month,year,budgetId])
+  
+}
+
 model Account {
   id                String  @id @default(auto()) @map("_id") @db.ObjectId
   userId            String  @db.ObjectId

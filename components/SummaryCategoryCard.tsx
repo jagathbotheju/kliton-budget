@@ -4,15 +4,15 @@ import { ScrollArea } from "./ui/scroll-area";
 import { formatPrice } from "@/lib/formatPrice";
 import { useBudgetStore } from "@/stores/budgetStore";
 import { Progress } from "./ui/progress";
+import { CategorySummary } from "@/types";
 
 interface Props {
   type: string;
+  categorySummary: CategorySummary[];
 }
 
-const SummaryCategoryCard = ({ type }: Props) => {
-  const { categorySummary, categories, budget } = useBudgetStore(
-    (store) => store
-  );
+const SummaryCategoryCard = ({ type, categorySummary }: Props) => {
+  const { categories, budget } = useBudgetStore((store) => store);
 
   const filteredData = categorySummary.filter((item) => item.type === type);
   const total = filteredData.reduce((acc, el) => acc + (el.amount || 0), 0);

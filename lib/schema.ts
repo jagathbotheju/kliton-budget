@@ -3,6 +3,12 @@ import { currencies } from "./currencies";
 import { differenceInDays } from "date-fns";
 import { MAX_DATE_RANGE_DAYS } from "./constants";
 
+export const HistoryDataSchema = z.object({
+  timeFrame: z.enum(["month", "year"]),
+  month: z.coerce.number().min(0).max(11).default(0),
+  year: z.coerce.number(),
+});
+
 export const OverviewSchema = z
   .object({
     from: z.coerce.date(),

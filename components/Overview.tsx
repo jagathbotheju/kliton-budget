@@ -7,6 +7,7 @@ import { useBudgetStore } from "@/stores/budgetStore";
 import { getSummary } from "@/actions/transactionActions";
 import SummaryCards from "./SummaryCards";
 import SummaryCategoryCards from "./SummaryCategoryCards";
+import History from "./History";
 
 export type BudgetSummary = {
   expense: number;
@@ -20,7 +21,11 @@ const Overview = () => {
     setBudgetSummary,
     budgetSummary,
     setCategorySummary,
+    categorySummary,
     setCategories,
+    setHistoryYears,
+    setYearHistoryData,
+    setMonthHistoryData,
   } = useBudgetStore((state) => state);
   const [date, setDate] = useState<DateRange>({
     from: startOfMonth(new Date()),
@@ -28,10 +33,24 @@ const Overview = () => {
   });
 
   useEffect(() => {
-    setCategories();
-    setBudgetSummary({ budgetId: budget.id, date });
-    setCategorySummary({ budgetId: budget.id, date });
-  }, [budget.id, date, setBudgetSummary, setCategorySummary, setCategories]);
+    startTransition(() => {
+      setCategories();
+      setBudgetSummary({ budgetId: budget.id, date });
+      setCategorySummary({ budgetId: budget.id, date });
+      setHistoryYears({ budgetId: budget.id });
+      setYearHistoryData({ budgetId: budget.id });
+      setMonthHistoryData({ budgetId: budget.id });
+    });
+  }, [
+    budget.id,
+    date,
+    setBudgetSummary,
+    setCategorySummary,
+    setCategories,
+    setHistoryYears,
+    setYearHistoryData,
+    setMonthHistoryData,
+  ]);
 
   return (
     <div className="mt-5 flex flex-col gap-4">
@@ -42,12 +61,13 @@ const Overview = () => {
         </div>
       </div>
 
-      <div className="container flex w-full flex-col gap-2">
+      <div className="container flex w-full flex-col gap-2 pb-5">
         <SummaryCards isLoading={isPending} budgetSummary={budgetSummary} />
         <SummaryCategoryCards
           isLoading={isPending}
-          budgetSummary={budgetSummary}
+          categorySummary={categorySummary}
         />
+        <History isLoading={isPending} budgetSummary={budgetSummary} />
       </div>
     </div>
   );

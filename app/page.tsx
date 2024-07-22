@@ -16,7 +16,11 @@ export default async function Home() {
   if (!user) redirect("/auth/login");
   if (!user.settings && _.isEmpty(user.budgets)) redirect("/wizard");
 
-  console.log("Home######################", user.name);
+  console.log(
+    "Home######################",
+    new Date().getFullYear(),
+    new Date().getMonth()
+  );
 
   return (
     <main className="bg-background w-full">
