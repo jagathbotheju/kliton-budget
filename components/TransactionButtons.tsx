@@ -1,46 +1,46 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { Button } from "./ui/button";
 import { UserExt } from "@/types";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
 import _ from "lodash";
 import NewTransactionDialog from "./NewTransactionDialog";
-import { Category } from "@prisma/client";
+import { Budget, Category } from "@prisma/client";
 import BudgetPicker from "./BudgetPicker";
+import { useBudgetStore } from "@/stores/budgetStore";
+import BudgetPickerNew from "./BudgetPickerNew";
 
 interface Props {
   user: UserExt;
   categories: Category[];
+  budgets: Budget[];
 }
 
 const TransactionButtons = ({ user, categories }: Props) => {
-  const budgets = user.budgets.map((budget) => budget.name);
+  const { userBudgets, setUserBudgets, budget, setBudget } = useBudgetStore(
+    (state) => state
+  );
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
-  if (_.isEmpty(budgets)) return null;
+  useEffect(() => {
+    setUserBudgets({ userId: user.id });
+  }, [setUserBudgets, user.id]);
 
-  // console.log("TransactionButtons -selectedBudget", selectedBudget);
+  if (_.isEmpty(userBudgets)) return null;
+
+  // console.log("TransactionButtons -selectedBudget", userBudgets);
 
   return (
     <div className="flex items-center gap-3">
       <div className="flex items-center gap-2">
         <span className="font-semibold text-xl">Budget : </span>
-        <BudgetPicker budgets={user.budgets} user={user} />
+        {/* <BudgetPicker budgets={userBudgets} user={user} /> */}
+        <BudgetPickerNew
+          user={user}
+          budget={budget}
+          budgets={userBudgets}
+          onBudgetChange={setBudget}
+        />
       </div>
 
       <NewTransactionDialog

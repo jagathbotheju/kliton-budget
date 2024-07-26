@@ -1,5 +1,19 @@
 import { Budget, Settings, Transaction, User } from "@prisma/client";
 
+type TransactionColumnsType = {
+  id: string;
+  categoryName: string;
+  description: string;
+  date: string;
+  type: string;
+  amount: string;
+};
+
+type Currency = {
+  name: string;
+  code: string;
+};
+
 type HistoryYear = {
   year: number;
 };

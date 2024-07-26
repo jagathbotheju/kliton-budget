@@ -1,3 +1,4 @@
+import { getUserBudgets } from "@/actions/budgetActions";
 import { CurrencyBox } from "@/components/CurrencyBox";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
@@ -11,18 +12,19 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { auth } from "@/lib/auth";
 import { UserExt } from "@/types";
-import { User } from "@prisma/client";
+import { Budget, User } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import React from "react";
+import ManageCurrency from "../manage/ManageCurrency";
 
 const WizardPage = async () => {
   const session = await auth();
   const user = session?.user as UserExt;
 
   if (!user) redirect("/auth/login");
-
-  console.log("WizardPage", user);
+  const response = await getUserBudgets({ userId: user.id });
+  const budgets = response.data as Budget[];
 
   return (
     <div className="relative flex flex-col items-center justify-center mx-auto">
@@ -49,7 +51,8 @@ const WizardPage = async () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <CurrencyBox user={user} />
+          {/* <CurrencyBox user={user} /> */}
+          <ManageCurrency user={user} budgets={budgets} />
         </CardContent>
       </Card>
       <Separator className="my-4" />

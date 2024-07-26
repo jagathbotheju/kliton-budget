@@ -39,12 +39,14 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { currencies, Currency } from "@/lib/currencies";
+import { useBudgetStore } from "@/stores/budgetStore";
 
 interface Props {
   user: UserExt;
 }
 
 const NewBudgetDialog = ({ user }: Props) => {
+  const { setUserBudgets } = useBudgetStore((state) => state);
   const [openCurrency, setOpenCurrency] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
@@ -68,6 +70,7 @@ const NewBudgetDialog = ({ user }: Props) => {
         .then((res) => {
           if (res.success) {
             setOpen(false);
+            setUserBudgets({ userId: user.id });
             return toast.success(res.message);
           } else {
             return toast.error(res.error);

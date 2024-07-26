@@ -3,9 +3,10 @@ import {
   getYearHistoryData,
   getHistoryYears,
   getMonthHistoryData,
+  getUserTransactions,
 } from "@/actions/transactionActions";
 import { BudgetSummary } from "@/components/Overview";
-import { Budget, Category } from "@prisma/client";
+import { Budget, Category, Transaction } from "@prisma/client";
 import { DateRange } from "react-day-picker";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -14,6 +15,7 @@ import { getCategories, getCategorySummary } from "@/actions/categoryActions";
 import { string, z } from "zod";
 import { CategorySummary, HistoryData, HistoryYear, Period } from "@/types";
 import _ from "lodash";
+import { getUserBudgets } from "@/actions/budgetActions";
 
 export type BudgetState = {
   historyYears: number[];
@@ -25,10 +27,13 @@ export type BudgetState = {
   categorySummary: CategorySummary[];
   timeFrame: "month" | "year";
   period: Period;
+  userBudgets: Budget[];
+  userTransactions: Transaction[];
 };
 
 export type BudgetActions = {
   setBudget: (budget: Budget) => void;
+  setUserBudgets: ({ userId }: { userId: string }) => void;
   setCategories: () => void;
   setHistoryYears: ({ budgetId }: { budgetId: string }) => void;
   setBudgetSummary: ({
@@ -63,6 +68,13 @@ export type BudgetActions = {
   }) => void;
   setTimeFrame: (timeFrame: "month" | "year") => void;
   setPeriod: (period: Period) => void;
+  setUserTransactions: ({
+    budgetId,
+    date,
+  }: {
+    budgetId: string;
+    date?: DateRange;
+  }) => void;
 };
 
 export type BudgetStore = BudgetState & BudgetActions;
@@ -82,11 +94,41 @@ export const useBudgetStore = create<BudgetStore>()(
         month: new Date().getMonth(),
         year: new Date().getFullYear(),
       },
+      userBudgets: [] as Budget[],
+      userTransactions: [] as Transaction[],
 
       setBudget: (budget: Budget) => {
         set(() => ({
           budget,
         }));
+      },
+
+      setUserBudgets: async ({ userId }) => {
+        const response = await getUserBudgets({
+          userId,
+        });
+        if (response.success && response.data) {
+          const userBudgets = response.data;
+
+          set(() => ({
+            userBudgets,
+          }));
+        }
+      },
+
+      /*****************SET USER TRANSACTIONS*************** */
+      setUserTransactions: async ({
+        budgetId,
+        date = { from: startOfMonth(new Date()), to: new Date() },
+      }) => {
+        const response = await getUserTransactions({ budgetId, date });
+
+        if (response && response.data) {
+          const transactions = response.data;
+          set(() => ({
+            userTransactions: transactions,
+          }));
+        }
       },
 
       /*****************SET TIME FRAME******************** */

@@ -16,11 +16,11 @@ export default async function Home() {
   if (!user) redirect("/auth/login");
   if (!user.settings && _.isEmpty(user.budgets)) redirect("/wizard");
 
-  console.log(
-    "Home######################",
-    new Date().getFullYear(),
-    new Date().getMonth()
-  );
+  const budgets = await prisma.budget.findMany({
+    where: {
+      userId: user.id,
+    },
+  });
 
   return (
     <main className="bg-background w-full">
@@ -28,7 +28,11 @@ export default async function Home() {
         <div className="container flex flex-wrap items-center justify-between gap-2 py-8">
           <p className="text-3xl font-bod">Hello, {user.name}</p>
 
-          <TransactionButtons user={user} categories={categories} />
+          <TransactionButtons
+            user={user}
+            categories={categories}
+            budgets={budgets}
+          />
         </div>
       </div>
 

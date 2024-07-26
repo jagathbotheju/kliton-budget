@@ -67,10 +67,11 @@ const NewTransactionDialog = ({ trigger, type, categories, user }: Props) => {
     setHistoryYears,
     period,
     timeFrame,
+    userBudgets,
     setYearHistoryData,
     setMonthHistoryData,
   } = useBudgetStore((store) => store);
-  const budgets = user.budgets as Budget[];
+  const budgets = userBudgets;
   const [openTransaction, setOpenTransaction] = useState(false);
   const [openCategory, setOpenCategory] = useState(false);
   const [openBudget, setOpenBudget] = useState(false);

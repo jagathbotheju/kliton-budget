@@ -18,12 +18,13 @@ const Overview = () => {
   const [isPending, startTransition] = useTransition();
   const {
     budget,
-    setBudgetSummary,
+    setBudget,
     budgetSummary,
-    setCategorySummary,
     categorySummary,
     setCategories,
     setHistoryYears,
+    setBudgetSummary,
+    setCategorySummary,
     setYearHistoryData,
     setMonthHistoryData,
   } = useBudgetStore((state) => state);
@@ -34,6 +35,7 @@ const Overview = () => {
 
   useEffect(() => {
     startTransition(() => {
+      // setBudget();
       setCategories();
       setBudgetSummary({ budgetId: budget.id, date });
       setCategorySummary({ budgetId: budget.id, date });
@@ -44,6 +46,7 @@ const Overview = () => {
   }, [
     budget.id,
     date,
+    // setBudget,
     setBudgetSummary,
     setCategorySummary,
     setCategories,

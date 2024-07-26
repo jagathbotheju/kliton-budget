@@ -76,6 +76,7 @@ export function DateRangePicker({ date, setDate }: Props) {
                   );
                 }
                 setDate(value);
+                setOpen(false);
               }}
               numberOfMonths={2}
             />

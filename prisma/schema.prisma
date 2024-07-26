@@ -55,8 +55,6 @@ model Category{
 
   transactions Transaction[]
 
-  // budgetId String @db.ObjectId
-  // bgdget Budget @relation(fields: [budgetId],references: [id])
 }
 
 model Transaction{

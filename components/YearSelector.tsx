@@ -1,5 +1,4 @@
 "use client";
-import { Period } from "@/types";
 import React from "react";
 import {
   Select,
@@ -12,8 +11,6 @@ import { useBudgetStore } from "@/stores/budgetStore";
 
 const YearSelector = () => {
   const { historyYears, period, setPeriod } = useBudgetStore((state) => state);
-
-  console.log("YearSelector", period);
 
   return (
     <Select

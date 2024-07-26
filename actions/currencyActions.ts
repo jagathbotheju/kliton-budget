@@ -3,39 +3,32 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-export const updateSettings = async ({
+export const updateCurrency = async ({
   userId,
+  budgetId,
   currency,
-  budgetName,
 }: {
   userId: string;
   currency: string;
-  budgetName: string;
+  budgetId: string;
 }) => {
   try {
-    const updatedUser = await prisma.user.update({
+    const updatedBudget = await prisma.budget.update({
       where: {
-        id: userId,
+        id: budgetId,
+        userId,
       },
       data: {
-        budgets: {
-          create: {
-            name: budgetName,
-          },
-        },
-        settings: {
-          create: {
-            currency,
-          },
-        },
+        currency,
       },
     });
 
-    if (updatedUser) {
+    if (updatedBudget) {
       revalidatePath("/");
       return {
         success: true,
         message: "Currency updated successfully",
+        data: updatedBudget,
       };
     }
 

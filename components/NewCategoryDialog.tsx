@@ -34,16 +34,19 @@ import data from "@emoji-mart/data";
 import { createCategory } from "@/actions/categoryActions";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
+import { useBudgetStore } from "@/stores/budgetStore";
 
 interface Props {
   type: TransactionType;
+  trigger?: React.ReactNode;
 }
 
-const NewCategoryDialog = ({ type }: Props) => {
+const NewCategoryDialog = ({ type, trigger }: Props) => {
   const theme = useTheme();
   const [isPending, startTransition] = useTransition();
   const [emojiOpen, emojiSetOpen] = useState(false);
   const [open, setOpen] = useState(false);
+  const { setCategories } = useBudgetStore((state) => state);
   const form = useForm<z.infer<typeof NewCategorySchema>>({
     resolver: zodResolver(NewCategorySchema),
     defaultValues: {
@@ -60,6 +63,7 @@ const NewCategoryDialog = ({ type }: Props) => {
         .then((res) => {
           if (res.success) {
             setOpen(false);
+            setCategories();
             return toast.success(res.message);
           } else {
             return toast.error(res.error);
@@ -74,13 +78,17 @@ const NewCategoryDialog = ({ type }: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          className="flex border-separate items-center justify-started rounded-none border-b px-3 py-3 text-muted-foreground"
-        >
-          <PlusSquare className="mr-2 h-4 w-4" />
-          Create New
-        </Button>
+        {trigger ? (
+          trigger
+        ) : (
+          <Button
+            variant="ghost"
+            className="flex border-separate items-center justify-started rounded-none border-b px-3 py-3 text-muted-foreground"
+          >
+            <PlusSquare className="mr-2 h-4 w-4" />
+            Create New
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
